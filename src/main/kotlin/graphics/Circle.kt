@@ -4,6 +4,8 @@ import org.lwjgl.opengl.GL11.*
 import kotlin.math.PI
 
 data class Circle(val pos: Vector2, val rad: Double, val color: Color?): Drawable {
+    constructor(p: Vector2, r: Double): this(p, r, null)
+
     override fun draw() {
         color?.apply()
         glBegin(GL_TRIANGLE_FAN)

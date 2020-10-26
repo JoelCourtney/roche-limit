@@ -9,6 +9,7 @@ import java.nio.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -16,6 +17,8 @@ public class HelloWorld {
 
     // The window handle
     private long window;
+
+    private Simulation sim;
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -47,10 +50,10 @@ public class HelloWorld {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(300, 300, "Hello graphics.World!", NULL, NULL);
+        window = glfwCreateWindow(500, 500, "Hello graphics.World!", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
-        World.INSTANCE.setSize(new Vector2(600,600));
+        World.INSTANCE.setSize(new Vector2(1000,1000));
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
@@ -86,8 +89,12 @@ public class HelloWorld {
         // Enable v-sync
         glfwSwapInterval(1);
 
+//        glEnable(GL_MULTISAMPLE);
+
         // Make the window visible
         glfwShowWindow(window);
+
+        sim = new Simulation("src/sim/7_balls.csv");
     }
 
     private void loop() {
@@ -113,12 +120,8 @@ public class HelloWorld {
     }
 
     public void draw() {
-        new Background(new Color4(1.0, 0.0, 0.0, 0.0)).draw();
-        new Circle(new Vector2(1, 0), 3, new Color3(0.5, 0.2, 0.9)).draw();
-        glBegin(GL_LINES);
-        new Vector2(-2, 2).draw();
-        new Vector2(2, -1).draw();
-        glEnd();
+        World.INSTANCE.setTime(glfwGetTime());
+        sim.draw();
         glfwSwapBuffers(window); // swap the color buffers
     }
 
