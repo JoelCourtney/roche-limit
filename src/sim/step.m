@@ -1,0 +1,22 @@
+function [dstate] = step(m1, m2, r1, r2, state)
+G = 6.67e-11;
+n = length(state);
+dpos = state(n/2 + 1 : end);
+dvel = zeros([n/2,1]);
+for i = 1:2:(n/2 - 3)
+    for j = (i+2):2:(n/2 - 1)
+        r = state(j:j+1) - state(i:i+1);
+        rnorm = norm(r);
+        grav = G*m2*r/rnorm^3;
+        bounce = -r*(r2/rnorm)^101 / r2;
+        relvel = state(n/2+j:n/2+j+1) - state(n/2+i:n/2+i+1);
+        drag = r*dot(relvel,r)/rnorm^2*(r2/rnorm)^50;
+        dvel(i:i+1) = dvel(i:i+1) + grav + bounce + drag;
+        dvel(j:j+1) = dvel(j:j+1) - grav - bounce - drag;
+    end
+    r = state(i:i+1);
+    rnorm = norm(r);
+    dvel(i:i+1) = dvel(i:i+1) - G*m1*r/rnorm^3;
+end
+dstate = [dpos; dvel];
+end
