@@ -1,5 +1,7 @@
 clear all; close all; clc;
 
+rng(102);
+
 earth_m = 5.97237e24;
 earth_r = 6371000;
 moon_m = 7.342e22;
@@ -17,10 +19,20 @@ velocity = zeros(size(position));
 
 initial_conditions = [position(:); velocity(:)];
 
-t = [0 1000000];
+t = [0 200000];
 [t, path] = ode15s(@(t, state) step(0, earth_m, saturn_r, earth_r, state), t, initial_conditions);
 
 figure; hold on; axis square;
 for i = 1:2:2*size(position,1)-1
     plot3(path(:, i)/moon_a, path(:, i+1)/moon_a, t);
 end
+
+% initial_conditions = path(end,2:end)';
+% 
+% t = [200000 0];
+% [t, path] = ode15s(@(t, state) step(0, earth_m, saturn_r, earth_r, state), t, initial_conditions);
+% 
+% figure; hold on; axis square;
+% for i = 1:2:2*size(position,1)-1
+%     plot3(path(:, i)/moon_a, path(:, i+1)/moon_a, t);
+% end

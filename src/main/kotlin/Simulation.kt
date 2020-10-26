@@ -1,9 +1,6 @@
 import graphics.*
 import java.io.File
 
-val moon_a = 384399000.0
-val earth_r = 6371000.0
-
 class Simulation(file: String): Drawable {
     val data = File(file).readLines().map {
         it.split(",").map { it.toDouble() }.toDoubleArray()
@@ -12,6 +9,8 @@ class Simulation(file: String): Drawable {
     var row = 0
 
     override fun draw() {
+        val moon_a = 384399000.0
+        val earth_r = 6371000.0
         Background(Color4(0.0, 0.0, 0.2, 0.0)).draw()
         val t = World.time
         while (data[row+1][0] / 10000 < t) row++

@@ -8,13 +8,13 @@ for i = 1:2:(n/2 - 3)
         r = state(j:j+1) - state(i:i+1);
         rnorm = norm(r);
         acc = G*m2*r/rnorm^3;
-%         if rnorm < r2*3
+        if rnorm < r2*3
             acc = acc - r*(r2/rnorm)^101 / r2;
             relvel = state(n/2+j:n/2+j+1) - state(n/2+i:n/2+i+1);
             acc = acc + r*dot(relvel,r)/rnorm^2*(r2/rnorm)^50;
-%         end
-        dvel(i:i+1) = dvel(i:i+1) + acc;
-        dvel(j:j+1) = dvel(j:j+1) - acc;
+        end
+        dvel(i:i+1) = dvel(i:i+1) + grav + bounce + drag;
+        dvel(j:j+1) = dvel(j:j+1) - grav - bounce - drag;
     end
     r = state(i:i+1);
     rnorm = norm(r);

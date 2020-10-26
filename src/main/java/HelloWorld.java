@@ -9,7 +9,6 @@ import java.nio.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -19,6 +18,9 @@ public class HelloWorld {
     private long window;
 
     private Simulation sim;
+
+    private boolean mouseDown = false;
+    private Vector2 mousePos;
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -48,6 +50,7 @@ public class HelloWorld {
         glfwDefaultWindowHints(); // optional, the current window hints are already the default
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+        glfwWindowHint(GLFW_SAMPLES, 8);
 
         // Create the window
         window = glfwCreateWindow(500, 500, "Hello graphics.World!", NULL, NULL);
@@ -61,8 +64,24 @@ public class HelloWorld {
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         });
         glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
-            World.INSTANCE.setSize(new Vector2(width, height));
-            draw();
+            glViewport(0,0,width,height);
+        });
+        glfwSetMouseButtonCallback(window, (window, button, action, mods) -> {
+            if (button == GLFW_MOUSE_BUTTON_LEFT) {
+                mouseDown = action == GLFW_PRESS;
+            }
+        });
+        glfwSetScrollCallback(window, (window, dx, dy) -> {
+            double z = World.INSTANCE.getZoom();
+            World.INSTANCE.setZoom(z*(dy>0?1.1:1/1.1));
+        });
+        glfwSetCursorPosCallback(window, (window, x, y) -> {
+            if (mouseDown) {
+                double dx = x - mousePos.getX();
+                double dy = y - mousePos.getY();
+                World.INSTANCE.dragByPixels(new Vector2(-dx, dy));
+            }
+            mousePos = new Vector2(x, y);
         });
 
         // Get the thread stack and push a new frame
@@ -88,8 +107,6 @@ public class HelloWorld {
         glfwMakeContextCurrent(window);
         // Enable v-sync
         glfwSwapInterval(1);
-
-//        glEnable(GL_MULTISAMPLE);
 
         // Make the window visible
         glfwShowWindow(window);
@@ -121,6 +138,12 @@ public class HelloWorld {
 
     public void draw() {
         World.INSTANCE.setTime(glfwGetTime());
+        IntBuffer w = BufferUtils.createIntBuffer(1);
+        IntBuffer h = BufferUtils.createIntBuffer(1);
+        glfwGetWindowSize(window, w, h);
+        int width = w.get(0);
+        int height = h.get(0);
+        World.INSTANCE.setSize(new Vector2(width, height));
         sim.draw();
         glfwSwapBuffers(window); // swap the color buffers
     }
